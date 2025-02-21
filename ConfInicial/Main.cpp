@@ -24,7 +24,7 @@ const GLchar* fragmentShaderSource =
 	"out vec4 color;\n"
 	"void main()\n"
 	"{\n"
-	"color = vec4(1.0f, 0.0f, 0.0f, 1.0f);\n"
+	"color = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
 	"}\n\0"
 };
 
@@ -44,7 +44,7 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-	GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "Practica 0 Jose Cesar Cortes Hernandez", nullptr, nullptr);
+	GLFWwindow *window = glfwCreateWindow(WIDTH, HEIGHT, "Practica 0", nullptr, nullptr);
 	
 	int screenWidth, screenHeight;
 
@@ -119,7 +119,7 @@ int main() {
 
 		// Render
 		// Clear the colorbuffer
-		glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 
