@@ -1,4 +1,4 @@
-//Carga de Modelos
+//Practica 6 carga de modelos
 //José César Cortés Hernández
 //N.cuenta: 313123762
 //8/marzo/2025
@@ -60,7 +60,7 @@ int main( )
     glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
     
     // Create a GLFWwindow object that we can use for GLFW's functions
-    GLFWwindow *window = glfwCreateWindow( WIDTH, HEIGHT, "Carga de modelos y camara sintetica- Jose Cesar Cortes Hernandez", nullptr, nullptr );
+    GLFWwindow *window = glfwCreateWindow( WIDTH, HEIGHT, "Carga de modelos practica 6- Jose Cesar Cortes Hernandez", nullptr, nullptr );
     
     if ( nullptr == window )
     {
@@ -101,7 +101,11 @@ int main( )
     
     // Load models
     Model dog((char*)"Models/RedDog.obj");
-    Model plant((char*)"Models/indoor plant_02.obj");
+    Model pasto((char*)"Models/grass.obj");
+    Model edificio((char*)"Models/Building_A01.obj");
+    Model tree((char*)"Models/tree.obj");
+    Model cono((char*)"Models/absperrhut.obj");
+    Model barricada((char*)"Models/Concrete_Barricade.obj");
 
     glm::mat4 projection = glm::perspective( camera.GetZoom( ), ( float )SCREEN_WIDTH/( float )SCREEN_HEIGHT, 0.1f, 100.0f );
     
@@ -136,17 +140,44 @@ int main( )
         
         
 
-        
+        //perro conn cordenadas
         model = glm::translate(model, glm::vec3(3.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
         glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
         dog.Draw(shader);
 
-        ////casa
-        model = glm::translate(model, glm::vec3(5.0f, 0.0f, 0.0f));
+        
+        //Edificio
+        model = glm::translate(model, glm::vec3(-12.0f, -0.5f, -0.0f));
+        model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        edificio.Draw(shader);
+
+        //tree
+        model = glm::translate(model, glm::vec3(20.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        tree.Draw(shader);
+
+        ////pasto
+        model = glm::translate(model, glm::vec3(0.0f, -2.0f, 0.0f));
         model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
         glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        plant.Draw(shader);
+        pasto.Draw(shader);
+
+        ////cono
+        model = glm::translate(model, glm::vec3(10.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        cono.Draw(shader);
+
+        ////barricada
+        model = glm::translate(model, glm::vec3(3.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        barricada.Draw(shader);
+
+
 
 
 
