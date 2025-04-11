@@ -1,11 +1,12 @@
-// Animacion Basica
-//Jose Cesar Cortes Hernandez
+//Práctica 10: Animación básica
+//Cortés Hernández José César
 //313123762
-//5 Abril 2025
+//11 de abril 2025
 
 #include <iostream>
 #include <cmath>
-
+#define M_PI 3.14159265358979323846
+// Include standard headers
 // GLEW
 #include <GL/glew.h>
 
@@ -30,8 +31,8 @@
 #include "Model.h"
 
 // Function prototypes
-void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode);
-void MouseCallback(GLFWwindow *window, double xPos, double yPos);
+void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode);
+void MouseCallback(GLFWwindow* window, double xPos, double yPos);
 void DoMovement();
 void Animation();
 
@@ -48,10 +49,6 @@ bool firstMouse = true;
 // Light attributes
 glm::vec3 lightPos(0.0f, 0.0f, 0.0f);
 bool active;
-float ballY = 0.0f;      // Altura inicial encima del perro
-float ballDirection = 1.0f; // 1 = sube, -1 = baja
-const float dogNoseHeight = 1.0f;  // Altura de la nariz del perro
-const float lightHeight = 2.0f;
 
 // Positions of the point lights
 glm::vec3 pointLightPositions[] = {
@@ -109,14 +106,15 @@ float vertices[] = {
 
 glm::vec3 Light1 = glm::vec3(0);
 //Anim
-float rotBall = 0;
-bool AnimBall = false;        // Si la animación está activa o no
-float ballPosX = 0.0f;        // Posición de la pelota en X
-float ballPosY = -1.3f;        // Posición de la pelota en Y (en la nariz del perro)
-float ballPosZ = 0.0f;        // Posición de la pelota en Z
-float ballSpeed = 0.01f;      // Velocidad del movimiento de la pelota
-bool movingToLight = true;    // Controla si la pelota se mueve hacia la luz o de vuelta
-
+float rotBall = 0.0f; //Angulo de rotación
+float direccion = 1.0f;
+float maxRot = 2.0f;		//altura maxima
+float radio = 1.0f;        // Radio del círculo
+float amplitud = 0.5f;     // Amplitud del movimiento senoidal
+float frecuencia = 2.0f;   // Frecuencia del movimiento senoidal
+float velocidad = 0.01f;
+bool AnimBall = false;
+float angulo = 0.0f;
 
 // Deltatime
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
@@ -134,7 +132,7 @@ int main()
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);*/
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Jose Cesar Cortes Hernandez - Animacion basica", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Animacion basica - Jose Cesar Cortes Hernandez", nullptr, nullptr);
 
 	if (nullptr == window)
 	{
@@ -168,10 +166,10 @@ int main()
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 
-
+	//carga de Shaders
 	Shader lightingShader("Shader/lighting.vs", "Shader/lighting.frag");
 	Shader lampShader("Shader/lamp.vs", "Shader/lamp.frag");
-	
+
 	//models
 	Model Dog((char*)"Models/RedDog.obj");
 	Model Piso((char*)"Models/piso.obj");
@@ -208,6 +206,10 @@ int main()
 		GLfloat currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
+		angulo += deltaTime * 16.0f; //se puede multiplicar por una cantidad para aumentar la velocidad de rotación
+		if (angulo > 360) {
+			angulo = 0.0f;
+		}
 
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
@@ -217,19 +219,19 @@ int main()
 		// Clear the colorbuffer
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	   
+
 		// OpenGL options
 		glEnable(GL_DEPTH_TEST);
 
-		
-		
-		
-	
+
+
+
+
 
 		// Use cooresponding shader when setting uniforms/drawing objects
 		lightingShader.Use();
 
-        glUniform1i(glGetUniformLocation(lightingShader.Program, "diffuse"), 0);
+		glUniform1i(glGetUniformLocation(lightingShader.Program, "diffuse"), 0);
 		//glUniform1i(glGetUniformLocation(lightingShader.Program, "specular"),1);
 
 		GLint viewPosLoc = glGetUniformLocation(lightingShader.Program, "viewPos");
@@ -238,25 +240,25 @@ int main()
 
 		// Directional light
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.direction"), -0.2f, -1.0f, -0.3f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"),0.6f,0.6f,0.6f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.ambient"), 0.6f, 0.6f, 0.6f);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.diffuse"), 0.6f, 0.6f, 0.6f);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"),0.3f, 0.3f, 0.3f);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "dirLight.specular"), 0.3f, 0.3f, 0.3f);
 
 
 		// Point light 1
-	    glm::vec3 lightColor;
-		lightColor.x= abs(sin(glfwGetTime() *Light1.x));
-		lightColor.y= abs(sin(glfwGetTime() *Light1.y));
-		lightColor.z= sin(glfwGetTime() *Light1.z);
+		glm::vec3 lightColor;
+		lightColor.x = abs(sin(glfwGetTime() * Light1.x));
+		lightColor.y = abs(sin(glfwGetTime() * Light1.y));
+		lightColor.z = sin(glfwGetTime() * Light1.z);
 
-		
+
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].position"), pointLightPositions[0].x, pointLightPositions[0].y, pointLightPositions[0].z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].ambient"), lightColor.x,lightColor.y, lightColor.z);
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].diffuse"), lightColor.x,lightColor.y,lightColor.z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].ambient"), lightColor.x, lightColor.y, lightColor.z);
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].diffuse"), lightColor.x, lightColor.y, lightColor.z);
 		glUniform3f(glGetUniformLocation(lightingShader.Program, "pointLights[0].specular"), 1.0f, 0.2f, 0.2f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].constant"), 1.0f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].linear"), 0.045f);
-		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"),0.075f);
+		glUniform1f(glGetUniformLocation(lightingShader.Program, "pointLights[0].quadratic"), 0.075f);
 
 
 		// SpotLight
@@ -270,7 +272,7 @@ int main()
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.quadratic"), 0.7f);
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.cutOff"), glm::cos(glm::radians(12.0f)));
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "spotLight.outerCutOff"), glm::cos(glm::radians(18.0f)));
-		
+
 
 		// Set material properties
 		glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 5.0f);
@@ -290,34 +292,40 @@ int main()
 
 
 		glm::mat4 model(1);
+		glm::mat4 modelTemp(1);
 
-	
-		
+
+
 		//Carga de modelo 
-        view = camera.GetViewMatrix();	
+		view = camera.GetViewMatrix();
 		model = glm::mat4(1);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		Piso.Draw(lightingShader);
 
-		model = glm::mat4(1);
+
+		model = glm::rotate(model, glm::radians(angulo), glm::vec3(0.0f, -1.0f, 0.0f)); //rotación
+		modelTemp = model = glm::translate(model, glm::vec3(0.15f, 0.0f, 0.0f));
+		//model perro
+		model = glm::translate(modelTemp, glm::vec3(0.5f, 0.0f, 0.0f));
+		modelTemp = model = glm::translate(model, glm::vec3(1.0f, (sin(angulo / 5) + 1) / 2, 0.0f));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 0);
 		Dog.Draw(lightingShader);
-
-		model = glm::mat4(1);
-		glEnable(GL_BLEND);//Avtiva la funcionalidad para trabajar el canal alfa
+		glEnable(GL_BLEND);//Activa la funcionalidad para trabajar el canal alfa
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		glUniform1i(glGetUniformLocation(lightingShader.Program, "transparency"), 1);
-		model = glm::translate(model, glm::vec3(0.0f, ballY, 0.0f));
-		model = glm::rotate(model, glm::radians(rotBall), glm::vec3(1.0f, 0.0f, 0.0f));
-		//model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f));
-		//model = glm::rotate(model, glm::radians(rotBall), glm::vec3(1.0f, 0.0f, 0.0f));
+		
+		//bola
+		model = glm::rotate(model, glm::radians(rotBall), glm::vec3(rotBall, rotBall, rotBall));
+		model = glm::translate(model, glm::vec3(0.0f, rotBall, 0.0f));
+		glBindVertexArray(0);
+
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-	    Ball.Draw(lightingShader); 
+		Ball.Draw(lightingShader);
 		glDisable(GL_BLEND);  //Desactiva el canal alfa 
 		glBindVertexArray(0);
-	
+
 
 		// Also draw the lamp object, again binding the appropriate shader
 		lampShader.Use();
@@ -334,14 +342,14 @@ int main()
 		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 		// Draw the light object (using light's vertex attributes)
-		
-			model = glm::mat4(1);
-			model = glm::translate(model, pointLightPositions[0]);
-			model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-			glBindVertexArray(VAO);
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		
+
+		model = glm::mat4(1);
+		model = glm::translate(model, pointLightPositions[0]);
+		model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
 		glBindVertexArray(0);
 
 
@@ -417,11 +425,11 @@ void DoMovement()
 	{
 		pointLightPositions[0].z += 0.01f;
 	}
-	
+
 }
 
 // Is called whenever a key is pressed/released via GLFW
-void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode)
+void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action)
 	{
@@ -446,60 +454,45 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 		if (active)
 		{
 			Light1 = glm::vec3(1.0f, 1.0f, 0.0f);
-			
+
 		}
 		else
 		{
-			Light1 = glm::vec3(0);//Cuado es solo un valor en los 3 vectores pueden dejar solo una componente
+			Light1 = glm::vec3(0);//Cuando es solo un valor en los 3 vectores pueden dejar solo una componente
 		}
 	}
 	if (keys[GLFW_KEY_N])
 	{
 		AnimBall = !AnimBall;
-		if (AnimBall)
-		{
-			ballPosX = 0.0f;  // Reinicia la posición
-			ballPosY = 1.0f;  // Posición inicial encima de la nariz
-			ballPosZ = 0.0f;
-			movingToLight = true;  // Empieza moviéndose hacia la fuente de luz
-		}
+
 	}
 }
+//GLuint modelLoc = glGetUniformLocation(lampShader.Program, "model");
 void Animation() {
-	
+
 	if (AnimBall) {
-		// Movimiento vertical
-		ballY += ballDirection * ballSpeed * deltaTime;
 
-		// Cambio de dirección cuando llega a los límites
-		if (ballY >= lightHeight) { // Llega a la luz
-			ballY = lightHeight;
-			ballDirection = -1.0f; // Cambia dirección hacia abajo
+
+		if (AnimBall) {
+			rotBall += 0.001f * direccion; // Incrementa o decrementa rotBall según la dirección
+
+			// Cambiar la dirección si se alcanza el límite
+			if (rotBall >= maxRot) {
+				direccion = -1; // Cambia a bajando
+			}
+			else if (rotBall <= 0.0f) {
+				direccion = 1; // Cambia a subiendo
+			}
 		}
-		else if (ballY <= dogNoseHeight) { // Llega a la nariz
-			ballY = dogNoseHeight;
-			ballDirection = 1.0f; // Cambia dirección hacia arriba
+		else {
+			rotBall = 0.0f; // Reinicia el valor si la animación no está activa
+			direccion = 1;  // Reinicia la dirección a subiendo
 		}
 
-		// Rotación continua en eje X
-		rotBall += 100.0f * deltaTime;
-		if (rotBall > 360.0f)
-			rotBall -= 360.0f;
 	}
-
-	//if (AnimBall)
-	//{
-	//	rotBall += 0.2f;
-	//	//printf("%f", rotBall);
-	//}
-	//else
-	//{
-	//	//rotBall = 0.0f;
-	//}
 }
 
-void MouseCallback(GLFWwindow *window, double xPos, double yPos)
-{
+void MouseCallback(GLFWwindow* window, double xPos, double yPos) {
 	if (firstMouse)
 	{
 		lastX = xPos;
