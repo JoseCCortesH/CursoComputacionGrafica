@@ -1,7 +1,7 @@
-//animación por maquina de estados
+//animación por maquina de estados practica 11
 //José César Cortés Hernández
 //313123762
-//20 de Abirl 2025
+//25 de Abril 2025
 #include <iostream>
 #include <cmath>
 
@@ -135,7 +135,7 @@ int main()
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);*/
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Jose Cesar Cortes Hernandez- Animacion maquina de estados", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Jose Cesar Cortes Hernandez- Practica 11 - Animacion maquina de estados", nullptr, nullptr);
 
 	if (nullptr == window)
 	{
@@ -505,7 +505,8 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 	}
 	if (keys[GLFW_KEY_B])
 	{
-		dogAnim = 1;
+		dogAnim = !dogAnim;
+		//dogAnim = 1;
 
 	}
 	
@@ -516,7 +517,6 @@ void Animation() {
 	const float pisoMaxX = 2.3f;
 	const float pisoMinZ = -2.3f;
 	const float pisoMaxZ = 2.3f;
-
 	if (AnimBall)
 	{
 		rotBall += 0.4f;
@@ -548,15 +548,33 @@ void Animation() {
 				step = false;
 			}
 		}
-		
-		//actualizacion del modelo
-		dogPos.z += 0.0001f;
-		//printf("\n%f",RLegs);
-		// Verificar si el perro está fuera de los límites del Piso
+		// Actualización del modelo
+		dogPos.z += 0.0003f * cos(glm::radians(dogRot));
+		dogPos.x += 0.0003f * sin(glm::radians(dogRot));
+		printf("\n%f", RLegs);
+
+
+
+
+		// Verificar si el perro está fuera de los límites del piso
 		if (dogPos.x < pisoMinX || dogPos.x > pisoMaxX || dogPos.z < pisoMinZ || dogPos.z > pisoMaxZ) {
-			// Detener la animación del perro
-			dogAnim = 0;
-			std::cout << "El perro ha llegado al borde del Piso. Animación detenida." << std::endl;
+			// Ajustar la rotación del perro para que gire
+			dogRot += 90.0f; // Gira 90 grados
+			if (dogRot >= 360.0f) {
+				dogRot -= 360.0f; // Mantener la rotación dentro de 0-360 grados
+			}//condicion para que el modelo gire 45 grados y se detenga al llegar al centro del modelo piso
+			if (dogPos.x == pisoMaxX || dogPos.z == pisoMinZ){
+				dogRot += 45.0f;
+				if (FLegs == 3.899996f || RLegs == 3.899996f) {
+					
+					dogAnim = 0;
+				}
+			}
+
+			// Asegurarse de que el perro permanezca dentro de los límites
+			dogPos.x = glm::clamp(dogPos.x, pisoMinX, pisoMaxX);
+			dogPos.z = glm::clamp(dogPos.z, pisoMinZ, pisoMaxZ);
+
 		}
 	}
 	
