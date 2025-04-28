@@ -230,7 +230,7 @@ int main()
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);*/
 
 	// Create a GLFWwindow object that we can use for GLFW's functions
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Jose Cesar Cortes Hernandez - Animacion maquina de estados", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Jose Cesar Cortes Hernandez - Animacion por KeyFrames", nullptr, nullptr);
 
 	if (nullptr == window)
 	{
